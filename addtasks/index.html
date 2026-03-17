@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My First App</title>
+  <title>Task App</title>
+  <style>
+    .completed { text-decoration: line-through; color: red; }
+  </style>
 </head>
 <body>
 
@@ -12,17 +15,48 @@
 
 <ul id="taskList"></ul>
 
+<p>Total Tasks: <span id="total">0</span></p>
+<p>Completed Tasks: <span id="completed">0</span></p>
+
 <script>
 function addTask() {
   let input = document.getElementById("taskInput")
   let task = input.value
+  if (!task) return;
 
   let li = document.createElement("li")
   li.textContent = task
 
-  document.getElementById("taskList").appendChild(li)
+  // Delete button
+  let delBtn = document.createElement("button")
+  delBtn.textContent = "Delete"
+  delBtn.onclick = function() {
+    li.remove()
+    updateCount()
+  }
 
+  li.appendChild(delBtn)
+
+  // Mark complete on click
+  li.onclick = function(e) {
+    if (e.target.tagName !== 'BUTTON') { // ignore clicks on delete button
+      li.classList.toggle("completed")
+      updateCount()
+    }
+  }
+
+  document.getElementById("taskList").appendChild(li)
   input.value = ""
+  updateCount()
+}
+
+function updateCount() {
+  let tasks = document.querySelectorAll("#taskList li")
+  let total = tasks.length
+  let completed = document.querySelectorAll("#taskList li.completed").length
+
+  document.getElementById("total").textContent = total
+  document.getElementById("completed").textContent = completed
 }
 </script>
 
