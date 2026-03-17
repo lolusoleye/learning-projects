@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My First App</title>
+</head>
+<body>
+
+<h1>Task App</h1>
+
+<input id="taskInput" type="text" placeholder="Enter task">
+<button onclick="addTask()">Add</button>
+
+<ul id="taskList"></ul>
+
+<script>
+function addTask() {
+  let input = document.getElementById("taskInput")
+  let task = input.value
+
+  let li = document.createElement("li")
+  li.textContent = task
+
+  document.getElementById("taskList").appendChild(li)
+
+  input.value = ""
+}
+</script>
+
+</body>
+</html>
