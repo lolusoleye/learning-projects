@@ -138,10 +138,14 @@ body.allDone {
   <div class="app">
     <h1>Task App</h1>
   
-    <div class="controls">
-      <input id="taskInput" type="text" placeholder="Enter task">
-      <button id="addBtn" type="button">Add</button>
+    <div style="margin-bottom: 12px;">
+      <button id="loginBtn">Sign in with Google</button>
+      <button id="logoutBtn" style="display:none;">Logout</button>
+      <span id="userInfo" style="margin-left:8px;"></span>
     </div>
+  
+    <input id="taskInput" type="text" placeholder="Enter task" disabled>
+    <button id="addBtn" disabled>Add</button>
   
     <ul id="taskList"></ul>
   
@@ -151,66 +155,119 @@ body.allDone {
     </div>
   </div>
 
-<script>
-  document.getElementById("addBtn").addEventListener("click", addTask)
-  document.getElementById("taskInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") addTask()
-})
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBBXDZDYc9CbRKujlrz3CvDWBEM6M924AQ",
+  authDomain: "taskapp-ec293.firebaseapp.com",
+  projectId: "taskapp-ec293",
+  storageBucket: "taskapp-ec293.firebasestorage.app",
+  messagingSenderId: "893083463536",
+  appId: "1:893083463536:web:f67fac8673c8424c3e69b5",
+  measurementId: "G-EL4J06KNH4"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+provider.setCustomParameters({
+  prompt: "select_account"
+});
+
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userInfo = document.getElementById("userInfo");
+const taskInput = document.getElementById("taskInput");
+const addBtn = document.getElementById("addBtn");
+
+loginBtn.addEventListener("click", async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    console.error("Sign in failed:", err);
+    alert(err.code || err.message);
+  }
+});
+
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    userInfo.textContent = `Hello, ${user.displayName}`;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline";
+    taskInput.disabled = false;
+    addBtn.disabled = false;
+  } else {
+    userInfo.textContent = "";
+    loginBtn.style.display = "inline";
+    logoutBtn.style.display = "none";
+    taskInput.disabled = true;
+    addBtn.disabled = true;
+  }
+});
+
+addBtn.addEventListener("click", addTask);
+taskInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addTask();
+});
+
 function addTask() {
-  let input = document.getElementById("taskInput")
-  let task = input.value
+  if (!auth.currentUser) return;
+  const task = taskInput.value.trim();
   if (!task) return;
 
-  let li = document.createElement("li")
-  let span = document.createElement("span")
-  span.className = "taskText"
-  span.textContent = task
+  const li = document.createElement("li");
+  const span = document.createElement("span");
+  span.className = "taskText";
+  span.textContent = task;
+  li.appendChild(span);
 
-  li.appendChild(span)
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "Delete";
+  delBtn.onclick = function (e) {
+    e.stopPropagation();
+    li.classList.add("removing");
+    li.addEventListener("transitionend", function onEnd(ev) {
+      if (ev.propertyName !== "opacity") return;
+      li.removeEventListener("transitionend", onEnd);
+      li.remove();
+      updateCount();
+    });
+  };
+  li.appendChild(delBtn);
 
-
-
-  // Delete button
-  let delBtn = document.createElement("button")
-  delBtn.textContent = "Delete"
-  delBtn.onclick = function(e) {
-  e.stopPropagation()
-  li.classList.add("removing")
-
-  li.addEventListener("transitionend", function onEnd(ev) {
-    if (ev.propertyName !== "opacity") return
-    li.removeEventListener("transitionend", onEnd)
-    li.remove()
-    updateCount()
-  })
-}
-  
-  
-
-  li.appendChild(delBtn)
-
-  // Mark complete on click
-  li.onclick = function(e) {
-    if (e.target.tagName !== 'BUTTON') { // ignore clicks on delete button
-      li.classList.toggle("completed")
-      updateCount()
+  li.onclick = function (e) {
+    if (e.target.tagName !== "BUTTON") {
+      li.classList.toggle("completed");
+      updateCount();
     }
-  }
+  };
 
-  document.getElementById("taskList").appendChild(li)
-  input.value = ""
-  updateCount()
+  document.getElementById("taskList").appendChild(li);
+  taskInput.value = "";
+  updateCount();
 }
 
 function updateCount() {
-  let tasks = document.querySelectorAll("#taskList li")
-  let total = tasks.length
-  let completed = document.querySelectorAll("#taskList li.completed").length
+  const tasks = document.querySelectorAll("#taskList li");
+  const total = tasks.length;
+  const completed = document.querySelectorAll("#taskList li.completed").length;
 
-  document.getElementById("total").textContent = total
-  document.getElementById("completed").textContent = completed
-
-  document.body.classList.toggle("allDone", total > 0 && completed === total)
+  document.getElementById("total").textContent = total;
+  document.getElementById("completed").textContent = completed;
+  document.body.classList.toggle("allDone", total > 0 && completed === total);
 }
 </script>
 
