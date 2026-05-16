@@ -1,4 +1,4 @@
-text = "bitcoin is going up bitcoin is pumping bitcoin"
+text = input("Paste your text here: ")
 
 words = text.split()
 
