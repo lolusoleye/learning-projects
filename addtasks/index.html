@@ -166,7 +166,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "[REDACTED]",
+  apiKey: "REDACTED ",
   authDomain: "taskapp-ec293.firebaseapp.com",
   projectId: "taskapp-ec293",
   storageBucket: "taskapp-ec293.firebasestorage.app",
@@ -223,10 +223,10 @@ taskInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") addTask();
 });
 
-function addTask() {
-  if (!auth.currentUser) return;
-  const task = taskInput.value.trim();
-  if (!task) return;
+  function addTask() {
+    if (!auth.currentUser) return;
+    const task = taskInput.value.trim();
+    if (!task) return;
 
   const li = document.createElement("li");
   const span = document.createElement("span");

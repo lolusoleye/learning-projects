@@ -1,0 +1,13 @@
+import random
+
+tally = {"heads": 0 , "tails" : 0 }
+for i in range(1000):
+   choice = random.choice(["heads","tails"])
+   if choice == "heads":
+       tally["heads"] = tally["heads"] + 1
+   else:
+       tally["tails"] = tally["tails"] + 1
+
+
+
+print(tally)
